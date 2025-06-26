@@ -142,7 +142,9 @@ const initializeSupabase = () => {
     // Attempt to create the Supabase client
     const client = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        persistSession: false, // Prevent auth issues during development
+        persistSession: true, // Enable session persistence
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
       },
     });
 

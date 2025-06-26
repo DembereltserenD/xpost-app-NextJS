@@ -2,9 +2,21 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { signOut } from "@/lib/auth";
-import { LayoutDashboard, FileText, Plus, LogOut, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getCurrentUser, signOut } from "@/lib/auth";
+import {
+  LayoutDashboard,
+  FileText,
+  Plus,
+  LogOut,
+  Menu,
+  X,
+  Users,
+  MessageSquare,
+  Settings,
+  Tags,
+  BarChart3,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AdminLayoutProps {
@@ -13,8 +25,22 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  // Skip layout for login page
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    };
+    checkUser();
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -25,6 +51,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Articles", href: "/admin/articles", icon: FileText },
     { name: "New Article", href: "/admin/articles/new", icon: Plus },
+    { name: "Categories", href: "/admin/categories", icon: Tags },
+    { name: "Authors", href: "/admin/authors", icon: Users },
+    { name: "Comments", href: "/admin/comments", icon: MessageSquare },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   return (
@@ -61,7 +92,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <ul className="space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive =
+                pathname === item.href ||
+                (item.href === "/admin/articles" &&
+                  pathname.startsWith("/admin/articles"));
 
               return (
                 <li key={item.name}>
@@ -84,6 +118,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         <div className="absolute bottom-4 left-4 right-4">
+          {user && (
+            <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground">Signed in as:</p>
+              <p className="text-sm font-medium text-foreground truncate">
+                {user.email}
+              </p>
+            </div>
+          )}
           <Button
             variant="ghost"
             onClick={handleSignOut}
@@ -108,12 +150,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             >
               <Menu className="w-6 h-6" />
             </Button>
-            <div className="text-foreground font-medium">Admin Panel</div>
+            <div className="flex items-center gap-4">
+              <div className="text-foreground font-medium">Admin Panel</div>
+              <Link href="/">
+                <Button variant="outline" size="sm">
+                  View Site
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* Page content */}
-        <main className="p-6">{children}</main>
+        <main>{children}</main>
       </div>
     </div>
   );
