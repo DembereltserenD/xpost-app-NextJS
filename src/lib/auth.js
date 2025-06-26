@@ -12,10 +12,22 @@ export const signOut = async () => {
 };
 
 export const getCurrentUser = async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+  try {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error) {
+      console.error("Error getting current user:", error);
+      return null;
+    }
+
+    return user;
+  } catch (error) {
+    console.error("Error in getCurrentUser:", error);
+    return null;
+  }
 };
 
 export const isAdmin = async () => {

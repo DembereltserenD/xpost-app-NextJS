@@ -72,6 +72,7 @@ export default function ArticleEditor({
   const [imageUploading, setImageUploading] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [previewMode, setPreviewMode] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     loadData();
@@ -143,9 +144,31 @@ export default function ArticleEditor({
     );
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required";
+    }
+
+    if (!formData.content.trim()) {
+      newErrors.content = "Content is required";
+    }
+
+    if (!formData.category_id) {
+      newErrors.category_id = "Category is required";
+    }
+
+    if (!formData.author_id) {
+      newErrors.author_id = "Author is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async (status: "draft" | "published") => {
-    if (!formData.title || !formData.content) {
-      alert("Title and content are required");
+    if (!validateForm()) {
       return;
     }
 
@@ -250,8 +273,11 @@ export default function ArticleEditor({
                     value={formData.title}
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     placeholder="Enter article title"
-                    className="bg-background border-border text-foreground"
+                    className={`bg-background border-border text-foreground ${errors.title ? "border-red-500" : ""}`}
                   />
+                  {errors.title && (
+                    <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                  )}
                 </div>
 
                 <div>
@@ -295,8 +321,13 @@ export default function ArticleEditor({
                     }
                     placeholder="Write your article content in Markdown..."
                     rows={20}
-                    className="bg-background border-border text-foreground font-mono"
+                    className={`bg-background border-border text-foreground font-mono ${errors.content ? "border-red-500" : ""}`}
                   />
+                  {errors.content && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.content}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -360,14 +391,16 @@ export default function ArticleEditor({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-foreground">Category</Label>
+                  <Label className="text-foreground">Category *</Label>
                   <Select
                     value={formData.category_id}
                     onValueChange={(value) =>
                       handleInputChange("category_id", value)
                     }
                   >
-                    <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectTrigger
+                      className={`bg-background border-border text-foreground ${errors.category_id ? "border-red-500" : ""}`}
+                    >
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -378,17 +411,24 @@ export default function ArticleEditor({
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.category_id && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.category_id}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <Label className="text-foreground">Author</Label>
+                  <Label className="text-foreground">Author *</Label>
                   <Select
                     value={formData.author_id}
                     onValueChange={(value) =>
                       handleInputChange("author_id", value)
                     }
                   >
-                    <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectTrigger
+                      className={`bg-background border-border text-foreground ${errors.author_id ? "border-red-500" : ""}`}
+                    >
                       <SelectValue placeholder="Select author" />
                     </SelectTrigger>
                     <SelectContent>
@@ -399,6 +439,11 @@ export default function ArticleEditor({
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.author_id && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.author_id}
+                    </p>
+                  )}
                 </div>
 
                 <div>

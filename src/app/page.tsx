@@ -2,8 +2,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Eye, MessageCircle, TrendingUp } from "lucide-react";
+import DateSorter from "@/components/DateSorter";
 
 export default function HomePage() {
+  const handleDateSelect = (date: string) => {
+    console.log("Selected date:", date);
+    // Here you can filter articles by the selected date
+    // You can implement the filtering logic based on created_at or published_at
+  };
+
   // Hero/Featured articles
   const heroArticles = [
     {
@@ -285,6 +292,11 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+
+        {/* Date Sorter */}
+        <div className="flex justify-center mb-8">
+          <DateSorter onDateSelect={handleDateSelect} />
         </div>
 
         {/* Trending Now Section */}

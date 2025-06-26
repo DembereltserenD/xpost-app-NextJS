@@ -60,7 +60,8 @@ export default function AdminLoginPage() {
       if (error) {
         setError(error.message);
       } else {
-        router.push("/admin");
+        // Force a hard redirect to ensure middleware runs
+        window.location.href = "/admin";
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
