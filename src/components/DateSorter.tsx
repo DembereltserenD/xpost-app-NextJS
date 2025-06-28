@@ -3,6 +3,14 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface DateSorterProps {
   onDateSelect?: (date: string) => void;
@@ -33,6 +41,7 @@ export default function DateSorter({
   const [activeDate, setActiveDate] = useState(
     selectedDate || dates[0].toISOString().split("T")[0],
   );
+  const [showFullYear, setShowFullYear] = useState(false);
 
   const handleDateClick = (date: Date) => {
     const dateString = date.toISOString().split("T")[0];
@@ -50,10 +59,18 @@ export default function DateSorter({
     } else if (date.toDateString() === yesterday.toDateString()) {
       return "Yesterday";
     } else {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
+      if (showFullYear) {
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      } else {
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      }
     }
   };
 
@@ -69,6 +86,25 @@ export default function DateSorter({
         className,
       )}
     >
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 rounded-full hover:bg-background/80 dark:hover:bg-background/60"
+          >
+            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-48">
+          <DropdownMenuItem
+            onClick={() => setShowFullYear(!showFullYear)}
+            className="cursor-pointer"
+          >
+            {showFullYear ? "Hide" : "Show"} Full Year
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       {dates.map((date, index) => {
         const dateString = date.toISOString().split("T")[0];
         const isActive = activeDate === dateString;
