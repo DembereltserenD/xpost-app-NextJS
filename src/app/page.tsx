@@ -1,210 +1,172 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Eye, MessageCircle, TrendingUp } from "lucide-react";
 import DateSorter from "@/components/DateSorter";
+import { getArticles, getCategories } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
+  const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch articles and categories
+        const [articlesResult, categoriesResult] = await Promise.all([
+          getArticles(20), // Get 20 articles
+          getCategories(),
+        ]);
+
+        if (articlesResult.error) {
+          console.error("Error fetching articles:", articlesResult.error);
+          setError("Failed to load articles");
+        } else {
+          setArticles(articlesResult.data || []);
+        }
+
+        if (categoriesResult.error) {
+          console.error("Error fetching categories:", categoriesResult.error);
+        } else {
+          setCategories(categoriesResult.data || []);
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load content");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const handleDateSelect = (date: string) => {
     console.log("Selected date:", date);
     // Here you can filter articles by the selected date
     // You can implement the filtering logic based on created_at or published_at
   };
 
-  // Hero/Featured articles
-  const heroArticles = [
-    {
-      id: "1",
-      slug: "global-leaders-climate-summit",
-      title:
-        "Global Leaders Gather for Climate Summit to Address Urgent Environmental Challenges",
-      excerpt:
-        "World leaders convene to discuss critical environmental policies and sustainable development goals.",
-      featured_image:
-        "https://images.unsplash.com/photo-1569163139394-de4e4f43e4e5?w=800&q=80",
-      published_at: "2025-06-24T06:45:00Z",
-      author: "James Wilson",
-      category: "Breaking News",
-      categoryColor: "bg-blue-600",
-    },
-    {
-      id: "2",
-      slug: "smartphone-features-mobile",
-      title: "New Smartphone Features Revolutionize Mobile Experience",
-      excerpt:
-        "Latest technology innovations transform how we interact with mobile devices.",
-      featured_image:
-        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80",
-      published_at: "2025-06-24T05:30:00Z",
-      author: "Tech Reporter",
-      category: "Technology",
-      categoryColor: "bg-purple-600",
-    },
-    {
-      id: "3",
-      slug: "markets-quarterly-reports",
-      title: "Markets Rise as Quarterly Reports Exceed Expectations",
-      excerpt:
-        "Financial markets show strong performance following positive earnings reports.",
-      featured_image:
-        "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
-      published_at: "2025-06-24T04:15:00Z",
-      author: "Financial Analyst",
-      category: "Business",
-      categoryColor: "bg-green-600",
-    },
-  ];
-
-  // Trending articles
-  const trendingArticles = [
-    {
-      id: "4",
-      title:
-        "Quantum Computing Breakthrough Promises New Era of Processing Power",
-      category: "Innovations",
-      time: "05:20 AM",
-      image:
-        "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&q=80",
-    },
-    {
-      id: "5",
-      title:
-        "Next-Generation Wearable Devices Focus on Health Monitoring Capabilities",
-      category: "Gadgets",
-      time: "04:45 AM",
-      image:
-        "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=400&q=80",
-    },
-    {
-      id: "6",
-      title:
-        "Open Source Projects Gaining Momentum in Enterprise Software Market",
-      category: "Software",
-      time: "04:10 AM",
-      image:
-        "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&q=80",
-    },
-    {
-      id: "7",
-      title: "Global Stock Markets React to Central Bank Policy Announcements",
-      category: "Markets",
-      time: "05:05 AM",
-      image:
-        "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=400&q=80",
-    },
-    {
-      id: "8",
-      title:
-        "Tech Startup Secures Record Funding Round for Sustainable Energy Solution",
-      category: "Startups",
-      time: "04:30 AM",
-      image:
-        "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&q=80",
-    },
-    {
-      id: "9",
-      title:
-        "Economic Indicators Point to Continued Growth Despite Global Challenges",
-      category: "Economy",
-      time: "03:55 AM",
-      image:
-        "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=400&q=80",
-    },
-  ];
-
-  // Latest news articles
-  const latestNews = [
-    {
-      id: "10",
-      title: "AI Integration Transforms Customer Service Industry",
-      excerpt:
-        "Companies report significant improvements in response times and customer satisfaction...",
-      category: "Technology",
-      categoryColor: "text-blue-500",
-      time: "06:20 AM",
-      image:
-        "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80",
-    },
-    {
-      id: "11",
-      title: "Renewable Energy Projects Set New Records in First Quarter",
-      excerpt:
-        "Solar and wind installations exceed projections as costs continue to decline...",
-      category: "Environment",
-      categoryColor: "text-green-500",
-      time: "06:10 AM",
-      image:
-        "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=400&q=80",
-    },
-    {
-      id: "12",
-      title:
-        "Digital Currency Adoption Accelerates Among Major Financial Institutions",
-      excerpt:
-        "Banks announce new blockchain initiatives as regulatory framework develops...",
-      category: "Finance",
-      categoryColor: "text-yellow-500",
-      time: "05:55 AM",
-      image:
-        "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=400&q=80",
-    },
-    {
-      id: "13",
-      title:
-        "Study Reveals Impact of Hybrid Learning Models on Student Outcomes",
-      excerpt:
-        "Research highlights benefits and challenges of combined in-person and remote...",
-      category: "Education",
-      categoryColor: "text-purple-500",
-      time: "05:40 AM",
-      image:
-        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&q=80",
-    },
-  ];
-
-  // Category sections
-  const categoryNews = {
-    Technology: [
-      {
-        title:
-          "Quantum Computing Breakthrough Promises New Era of Processing Power",
-        subcategory: "Innovations",
-        time: "05:20 AM",
-      },
-      {
-        title:
-          "Next-Generation Wearable Devices Focus on Health Monitoring Capabilities",
-        subcategory: "Gadgets",
-        time: "04:45 AM",
-      },
-      {
-        title:
-          "Open Source Projects Gaining Momentum in Enterprise Software Market",
-        subcategory: "Software",
-        time: "04:10 AM",
-      },
-    ],
-    Business: [
-      {
-        title:
-          "Global Stock Markets React to Central Bank Policy Announcements",
-        subcategory: "Markets",
-        time: "05:05 AM",
-      },
-      {
-        title:
-          "Tech Startup Secures Record Funding Round for Sustainable Energy Solution",
-        subcategory: "Startups",
-        time: "04:30 AM",
-      },
-      {
-        title:
-          "Economic Indicators Point to Continued Growth Despite Global Challenges",
-        subcategory: "Economy",
-        time: "03:55 AM",
-      },
-    ],
+  // Helper function to get category color
+  const getCategoryColor = (categoryName: string) => {
+    const colors = {
+      Technology: "bg-purple-600",
+      Business: "bg-green-600",
+      "Breaking News": "bg-blue-600",
+      Environment: "bg-green-500",
+      Finance: "bg-yellow-500",
+      Education: "bg-purple-500",
+      Sports: "bg-red-600",
+      Health: "bg-pink-600",
+      Politics: "bg-indigo-600",
+      Science: "bg-cyan-600",
+    };
+    return colors[categoryName] || "bg-gray-600";
   };
+
+  // Helper function to format time
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  // Get hero articles (first 3)
+  const heroArticles = articles.slice(0, 3).map((article) => ({
+    ...article,
+    categoryColor: getCategoryColor(article.categories?.name || "General"),
+    category: article.categories?.name || "General",
+    author: article.authors?.name || "Anonymous",
+    featured_image:
+      article.featured_image ||
+      "https://images.unsplash.com/photo-1569163139394-de4e4f43e4e5?w=800&q=80",
+  }));
+
+  // Get trending articles (next 6)
+  const trendingArticles = articles.slice(3, 9).map((article) => ({
+    ...article,
+    category: article.categories?.name || "General",
+    time: formatTime(article.published_at || article.created_at),
+    image:
+      article.featured_image ||
+      "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&q=80",
+  }));
+
+  // Get latest news (next 4)
+  const latestNews = articles.slice(9, 13).map((article) => ({
+    ...article,
+    category: article.categories?.name || "General",
+    categoryColor: `text-${getCategoryColor(article.categories?.name || "General").split("-")[1]}-500`,
+    time: formatTime(article.published_at || article.created_at),
+    image:
+      article.featured_image ||
+      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80",
+  }));
+
+  // Group remaining articles by category
+  const categoryNews = {};
+  categories.slice(0, 2).forEach((category) => {
+    const categoryArticles = articles
+      .filter((article) => article.categories?.name === category.name)
+      .slice(0, 3)
+      .map((article) => ({
+        title: article.title,
+        subcategory: article.categories?.name || "General",
+        time: formatTime(article.published_at || article.created_at),
+        slug: article.slug,
+      }));
+
+    if (categoryArticles.length > 0) {
+      categoryNews[category.name] = categoryArticles;
+    }
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading articles...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
